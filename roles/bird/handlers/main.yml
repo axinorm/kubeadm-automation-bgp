@@ -1,0 +1,5 @@
+---
+- name: Restart Bird service
+  systemd:
+    name: bird
+    state: restarted

@@ -1,0 +1,19 @@
+---
+- name: Allow packet forward
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    sysctl_set: true
+    sysctl_file: /etc/sysctl.d/99-router.conf
+
+- name: Install Bird
+  apt:
+    name: bird
+    state: present
+    update_cache: true
+
+- name: Copy and template bird.conf
+  template:
+    src: bird.conf.j2
+    dest: /etc/bird/bird.conf
+  notify: Restart Bird service

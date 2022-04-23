@@ -1,0 +1,21 @@
+---
+- name: Create network file with netplan
+  blockinfile:
+    path: /etc/netplan/99-static-route.yaml
+    create: true
+    block: |
+      network:
+        version: 2
+        renderer: networkd
+        ethernets:
+          enp0s8:
+            routes:
+              - to: {{ kubernetes_network_base }}.0/24
+                via: {{ client_network_base }}.1
+              - to: {{ bgp_network_base }}.0/24
+                via: {{ client_network_base }}.1
+  register: network_configuration
+
+- name: Apply network configuration
+  command: netplan apply
+  when: network_configuration is changed

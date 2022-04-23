@@ -1,0 +1,43 @@
+---
+- hosts: all
+  gather_facts: true
+  become: true
+  roles:
+    - { role: ntp, tags: ntp }
+    - { role: locale, tags: locale }
+
+- hosts: router
+  gather_facts: true
+  become: true
+  roles:
+    - { role: bird, tags: bird }
+
+- hosts: k8s-cluster
+  gather_facts: true
+  become: true
+  roles:
+    - { role: containerd, tags: containerd }
+    - { role: commons/route-config, tags: commons }
+    - { role: commons/os-checker, tags: commons }
+    - { role: commons/pre-install, tags: commons }
+
+- hosts: k8s-master
+  gather_facts: true
+  become: true
+  roles:
+    - { role: kubernetes/master, tags: master }
+    - { role: cni, tags: cni }
+
+- hosts: k8s-worker
+  gather_facts: true
+  become: true
+  roles:
+    - { role: kubernetes/node, tags: node }
+
+- hosts: client
+  gather_facts: true
+  become: true
+  roles:
+    - { role: client/route-config, tags: client }
+    - { role: client/kubectl, tags: client }
+    - { role: client/helm, tags: client }

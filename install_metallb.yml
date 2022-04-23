@@ -1,0 +1,31 @@
+# INSTALL Before
+# ansible-galaxy collection install kubernetes.core
+
+- hosts: client
+  gather_facts: true
+  become: true
+  vars:
+    metallb_chart_version: 2.6.2
+
+  tasks:
+  - name: Install metallb chart
+    kubernetes.core.helm:
+      release_name: metallb
+      chart_ref: metallb
+      chart_version: "{{ metallb_chart_version }}"
+      chart_repo_url: https://charts.bitnami.com/bitnami
+      release_namespace: metallb-system
+      create_namespace: true
+      values:
+        configInline:
+          peers:
+          - my-asn: 22000
+            peer-asn: 11000
+            peer-address: 10.0.0.1
+          address-pools:
+          - name: my-ip-space
+            protocol: bgp
+            avoid-buggy-ips: true
+            addresses:
+            - 172.16.254.0/24
+    become: false

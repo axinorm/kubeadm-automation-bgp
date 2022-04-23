@@ -1,0 +1,26 @@
+router id {{ client_network_base }}.1;
+
+protocol direct {
+  interface "lo";
+}
+
+protocol kernel {
+  persist;
+  scan time 20;
+  merge paths on;
+  import all;
+  export all;
+}
+
+protocol device {
+  scan time 10;
+}
+
+{% for worker_number in range(1, (kubernetes_worker_number | int) + 1) %}
+protocol bgp peer{{ worker_number }} {
+  local as 11000;
+  neighbor {{ kubernetes_network_base }}.{{ worker_number + 50 }} as 22000;
+  import all;
+  export all;
+}
+{% endfor %}

@@ -1,0 +1,42 @@
+---
+- name: Add Kubernetes APT GPG key
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: Add Kubernetes APT repository
+  apt_repository:
+    repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+    filename: 'kubernetes'
+
+- name: Install kubectl
+  apt:
+    name: kubectl={{ kubernetes_package_version }}-00
+    update_cache: true
+    state: present
+
+- name: Create Kubernetes config directory
+  file:
+    path: ".kube/"
+    state: directory
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: 0755
+
+- name: Copy kubeconfig
+  copy:
+    src: kubeconfig_master
+    dest: ".kube/config"
+    owner: "{{ ansible_user | default(ansible_user_id) }}"
+    group: "{{ ansible_user | default(ansible_user_id) }}"
+    mode: 0700
+
+- name: Add kubectl completion in .bashrc
+  blockinfile:
+    path: .bashrc
+    block: |
+      source <(kubectl completion bash)
+
+      alias k=kubectl
+      complete -F __start_kubectl k
